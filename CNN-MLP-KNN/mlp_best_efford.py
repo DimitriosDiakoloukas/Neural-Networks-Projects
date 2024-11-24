@@ -9,19 +9,26 @@ data_dir = 'cifar-10-batches-py'
 (x_train, y_train), (x_test, y_test) = load_cifar10_data(data_dir)
 
 num_classes=10
-epochs=20
-batch_size=128
+epochs=30
+batch_size=60
 
 y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
 
 model = keras.Sequential()
 model.add(layers.Flatten(input_shape=(32, 32, 3)))
-model.add(layers.Dense(128, activation='relu'))  
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(num_classes, activation='softmax'))   
+model.add(layers.Dense(512, activation='relu'))
+model.add(layers.BatchNormalization())
+model.add(layers.Dropout(0.4))  
+model.add(layers.Dense(256, activation='relu'))
+model.add(layers.BatchNormalization())
+model.add(layers.Dropout(0.4))
+model.add(layers.Dense(128, activation='relu'))
+model.add(layers.BatchNormalization())
+model.add(layers.Dropout(0.3))
+model.add(layers.Dense(num_classes, activation='softmax'))
 
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001),loss='categorical_crossentropy',metrics=['accuracy'])
 history = model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_data=(x_test, y_test))
 
 plt.figure(figsize=(15, 6))
@@ -41,10 +48,10 @@ plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
 
-plt.savefig("training_history_MLP_onelayer.png")
+plt.savefig("training_history_MLP_BEST.png")
 plt.close()  
 
-test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)       
+test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
 y_pred = model.predict(x_test)
 predicted_labels = np.argmax(y_pred, axis=1)
 true_labels = np.argmax(y_test, axis=1)
@@ -72,8 +79,8 @@ for i in range(7):
     ax.set_title(f"Pred: {pred_label}, True: {true_label}")
     ax.axis('off')
 
-plt.savefig("sample_predictions_onelayer.png")  
+plt.savefig("sample_predictions_MLP_BEST.png")  
 plt.close() 
 
 print()
-print(f"MLP model with one layer accuracy: {test_acc}")
+print(f"MLP model accuracy: {test_acc}")

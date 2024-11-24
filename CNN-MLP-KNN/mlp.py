@@ -8,16 +8,13 @@ from load_data_cifer import load_cifar10_data
 data_dir = 'cifar-10-batches-py'  
 (x_train, y_train), (x_test, y_test) = load_cifar10_data(data_dir)
 
-num_classes = 10
-epochs = 15
-batch_size = 60
+num_classes=10
+epochs=15
+batch_size=60
 
 y_train = to_categorical(y_train, num_classes)
 y_test = to_categorical(y_test, num_classes)
 
-#Μοντελο με 2 κρυφα επιπεδα, 256 και 128 νευρωνες με συναρτηση ενεργοποιησης relu
-#2 dropout layers με χαμηλο rate για αποφυγη over fitting
-#Softmax στο επιπεδο εξοδου
 model = keras.Sequential()
 model.add(layers.Flatten(input_shape=(32, 32, 3)))
 model.add(layers.Dense(256, activation='relu'))  
