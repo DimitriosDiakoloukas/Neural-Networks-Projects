@@ -27,7 +27,6 @@ def evaluate_svm_with_libsvm(svm_model, x_test, y_test):
     return accuracy, y_pred
 
 def plot_results(y_test, y_pred, accuracy, kernel_type):
-    # Confusion Matrix Visualization
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(10, 7))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
@@ -46,26 +45,20 @@ def plot_results(y_test, y_pred, accuracy, kernel_type):
 data_dir = 'cifar-10-batches-py'
 num_classes = 10
 
-# Step 1: Load CIFAR-10 Dataset
 (x_train, y_train), (x_test, y_test) = load_cifar10_data(data_dir)
 
-# Flatten the data for SVM
 X = np.vstack((x_train.reshape(x_train.shape[0], -1), x_test.reshape(x_test.shape[0], -1)))
 y = np.hstack((y_train, y_test))
 
-# Step 2: PCA for dimensionality reduction
 pca_variance = 0.90
 print(f"Performing PCA to retain {pca_variance * 100}% variance")
 X_pca = perform_pca_specific_variance(X, pca_variance)
 
-# Step 3: Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.4, random_state=42)
 print(f"Training samples: {X_train.shape[0]}, Testing samples: {X_test.shape[0]}")
 
-# Open a file to save results
 results_file = "svm_results.txt"
 with open(results_file, "w") as f:
-    # Kernels to test
     kernels = {'linear': '-t 0', 'polynomial': '-t 1', 'radial basis function': '-t 2', 'sigmoid': '-t 3'}
 
     for kernel_name, kernel_param in kernels.items():
@@ -86,12 +79,10 @@ with open(results_file, "w") as f:
         print(f"Evaluation time for {kernel_name} kernel: {evaluation_time:.2f} seconds")
         print(f"Accuracy for {kernel_name} kernel: {accuracy:.4f}")
 
-        # Generate a classification report
         report = classification_report(y_test, y_pred)
         f.write(f"Classification Report for {kernel_name} kernel:\n{report}\n")
         print(f"Classification Report for {kernel_name} kernel:\n", report)
 
-        # Step 6: Visualization
         plot_results(y_test, y_pred, accuracy, kernel_name)
 
 print(f"Results saved to {results_file}")

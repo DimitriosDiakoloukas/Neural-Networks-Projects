@@ -29,7 +29,6 @@ def evaluate_svm_with_libsvm(svm_model, x_test, y_test):
     return accuracy, y_pred
 
 def plot_results(y_test, y_pred, accuracy):
-    # Confusion Matrix Visualization
     cm = confusion_matrix(y_test, y_pred)
     plt.figure(figsize=(10, 7))
     plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
