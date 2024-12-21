@@ -1,7 +1,7 @@
 
 Using linear kernel
-Training time for linear kernel: 843.52 seconds
-Evaluation time for linear kernel: 81.53 seconds
+Training time for linear kernel: 869.94 seconds
+Evaluation time for linear kernel: 70.49 seconds
 Accuracy for linear kernel: 0.4051
 Classification Report for linear kernel:
               precision    recall  f1-score   support
@@ -23,8 +23,8 @@ weighted avg       0.40      0.41      0.40     24000
 
 
 Using polynomial kernel
-Training time for polynomial kernel: 219.88 seconds
-Evaluation time for polynomial kernel: 90.21 seconds
+Training time for polynomial kernel: 196.78 seconds
+Evaluation time for polynomial kernel: 88.66 seconds
 Accuracy for polynomial kernel: 0.4625
 Classification Report for polynomial kernel:
               precision    recall  f1-score   support
@@ -46,8 +46,8 @@ weighted avg       0.48      0.46      0.46     24000
 
 
 Using radial basis function kernel
-Training time for radial basis function kernel: 159.19 seconds
-Evaluation time for radial basis function kernel: 102.69 seconds
+Training time for radial basis function kernel: 120.26 seconds
+Evaluation time for radial basis function kernel: 79.87 seconds
 Accuracy for radial basis function kernel: 0.5329
 Classification Report for radial basis function kernel:
               precision    recall  f1-score   support
@@ -69,8 +69,8 @@ weighted avg       0.53      0.53      0.53     24000
 
 
 Using sigmoid kernel
-Training time for sigmoid kernel: 120.99 seconds
-Evaluation time for sigmoid kernel: 110.60 seconds
+Training time for sigmoid kernel: 70.17 seconds
+Evaluation time for sigmoid kernel: 71.25 seconds
 Accuracy for sigmoid kernel: 0.2007
 Classification Report for sigmoid kernel:
               precision    recall  f1-score   support

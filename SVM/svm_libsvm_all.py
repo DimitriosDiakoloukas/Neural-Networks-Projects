@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.decomposition import PCA
-from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 from libsvm.svmutil import *
 import time
@@ -43,12 +43,15 @@ def plot_results(y_test, y_pred, accuracy, kernel_type):
     print(f"Confusion matrix saved as {plot_file}")
 
 data_dir = 'cifar-10-batches-py'
-num_classes = 10
 
 (x_train, y_train), (x_test, y_test) = load_cifar10_data(data_dir)
 
+num_classes = 10
+y_train = to_categorical(y_train, num_classes=num_classes)
+y_test = to_categorical(y_test, num_classes=num_classes)
+
 X = np.vstack((x_train.reshape(x_train.shape[0], -1), x_test.reshape(x_test.shape[0], -1)))
-y = np.hstack((y_train, y_test))
+y = np.argmax(np.vstack((y_train, y_test)), axis=1) 
 
 pca_variance = 0.90
 print(f"Performing PCA to retain {pca_variance * 100}% variance")
@@ -79,7 +82,7 @@ with open(results_file, "w") as f:
         print(f"Evaluation time for {kernel_name} kernel: {evaluation_time:.2f} seconds")
         print(f"Accuracy for {kernel_name} kernel: {accuracy:.4f}")
 
-        report = classification_report(y_test, y_pred)
+        report = classification_report(y_test, y_pred, labels=np.arange(num_classes))
         f.write(f"Classification Report for {kernel_name} kernel:\n{report}\n")
         print(f"Classification Report for {kernel_name} kernel:\n", report)
 
