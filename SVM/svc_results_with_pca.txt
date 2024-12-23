@@ -1,8 +1,8 @@
 Training data shape: (50000, 32, 32, 3), Labels: (50000,)
 Test data shape: (10000, 32, 32, 3), Labels: (10000,)
 Number of PCA components retained: 99
-Best parameters found: {'kernel': 'rbf', 'gamma': 'auto', 'C': 1}
-Hyperparameter search time: 374.09 seconds
-Test Accuracy: 0.5518
-Evaluation time: 197.66 seconds
-Predictions: [3 8 8 0 4 6 3 4 2 1]... (first 10 predictions)
+Best parameters found: {'kernel': 'rbf', 'gamma': 'auto', 'C': 100}
+Hyperparameter search time: 10122.85 seconds
+Test Accuracy: 0.5561
+Evaluation time: 206.37 seconds
+Predictions: [3 8 8 0 4 6 3 6 2 1]... (first 10 predictions)
