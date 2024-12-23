@@ -1,0 +1,60 @@
+
+Using linear kernel
+Training time for linear kernel: 50.81 seconds
+Evaluation time for linear kernel: 20.94 seconds
+Accuracy for linear kernel: 0.7710
+Classification Report for linear kernel:
+              precision    recall  f1-score   support
+
+     Class 0       0.75      0.79      0.77      1956
+     Class 1       0.79      0.75      0.77      2044
+
+    accuracy                           0.77      4000
+   macro avg       0.77      0.77      0.77      4000
+weighted avg       0.77      0.77      0.77      4000
+
+
+Using polynomial kernel
+Training time for polynomial kernel: 40.07 seconds
+Evaluation time for polynomial kernel: 29.15 seconds
+Accuracy for polynomial kernel: 0.7590
+Classification Report for polynomial kernel:
+              precision    recall  f1-score   support
+
+     Class 0       0.86      0.61      0.71      1956
+     Class 1       0.71      0.90      0.79      2044
+
+    accuracy                           0.76      4000
+   macro avg       0.78      0.76      0.75      4000
+weighted avg       0.78      0.76      0.75      4000
+
+
+Using radial basis function kernel
+Training time for radial basis function kernel: 31.30 seconds
+Evaluation time for radial basis function kernel: 25.31 seconds
+Accuracy for radial basis function kernel: 0.8137
+Classification Report for radial basis function kernel:
+              precision    recall  f1-score   support
+
+     Class 0       0.83      0.78      0.80      1956
+     Class 1       0.80      0.84      0.82      2044
+
+    accuracy                           0.81      4000
+   macro avg       0.81      0.81      0.81      4000
+weighted avg       0.81      0.81      0.81      4000
+
+
+Using sigmoid kernel
+Training time for sigmoid kernel: 34.90 seconds
+Evaluation time for sigmoid kernel: 26.31 seconds
+Accuracy for sigmoid kernel: 0.7860
+Classification Report for sigmoid kernel:
+              precision    recall  f1-score   support
+
+     Class 0       0.80      0.76      0.78      1956
+     Class 1       0.78      0.81      0.80      2044
+
+    accuracy                           0.79      4000
+   macro avg       0.79      0.79      0.79      4000
+weighted avg       0.79      0.79      0.79      4000
+

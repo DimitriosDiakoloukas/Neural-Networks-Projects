@@ -1,0 +1,46 @@
+Grid Search Results for RBF Kernel
+==================================================
+Best Parameters: {'C': 100, 'gamma': 0.001}
+
+Grid Search Results:
+C=0.001, gamma=0.001, accuracy=72.75%
+C=0.001, gamma=0.01, accuracy=70.00%
+C=0.001, gamma=0.1, accuracy=50.45%
+C=0.001, gamma=1, accuracy=50.15%
+C=0.001, gamma=10, accuracy=50.00%
+C=0.001, gamma=100, accuracy=50.25%
+C=0.01, gamma=0.001, accuracy=77.50%
+C=0.01, gamma=0.01, accuracy=77.70%
+C=0.01, gamma=0.1, accuracy=50.45%
+C=0.01, gamma=1, accuracy=50.15%
+C=0.01, gamma=10, accuracy=50.00%
+C=0.01, gamma=100, accuracy=50.30%
+C=0.1, gamma=0.001, accuracy=83.35%
+C=0.1, gamma=0.01, accuracy=85.75%
+C=0.1, gamma=0.1, accuracy=50.45%
+C=0.1, gamma=1, accuracy=50.15%
+C=0.1, gamma=10, accuracy=50.00%
+C=0.1, gamma=100, accuracy=50.30%
+C=1, gamma=0.001, accuracy=86.85%
+C=1, gamma=0.01, accuracy=90.20%
+C=1, gamma=0.1, accuracy=67.20%
+C=1, gamma=1, accuracy=50.60%
+C=1, gamma=10, accuracy=50.00%
+C=1, gamma=100, accuracy=50.30%
+C=10, gamma=0.001, accuracy=89.55%
+C=10, gamma=0.01, accuracy=91.15%
+C=10, gamma=0.1, accuracy=68.90%
+C=10, gamma=1, accuracy=50.80%
+C=10, gamma=10, accuracy=50.00%
+C=10, gamma=100, accuracy=50.30%
+C=100, gamma=0.001, accuracy=91.60%
+C=100, gamma=0.01, accuracy=91.25%
+C=100, gamma=0.1, accuracy=68.90%
+C=100, gamma=1, accuracy=50.80%
+C=100, gamma=10, accuracy=50.00%
+C=100, gamma=100, accuracy=50.30%
+
+Final Model Evaluation:
+Accuracy: 91.60%
+Number of Support Vectors: 3062
+Total Time: 362 sec

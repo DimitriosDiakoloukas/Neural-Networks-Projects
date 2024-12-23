@@ -1,133 +1,163 @@
-import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split, KFold
-from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 import matplotlib.pyplot as plt
-from libsvm.svmutil import *
+from itertools import product
+from libsvm.svmutil import svm_train, svm_predict
+from sklearn.decomposition import PCA
+from sklearn.metrics import f1_score
+import random
 import time
 from load_data_cifer import load_cifar10_data
+import numpy as np
 
-# Perform PCA for dimensionality reduction
-def perform_pca_specific_variance(data, n_components):
-    print("Performing PCA with specific variance...")
-    pca = PCA(n_components)
-    transformed_data = pca.fit_transform(data)
-    print(f"Number of principal components: {pca.n_components_}")
-    return transformed_data
 
-# Train SVM using libsvm
-def train_svm_with_libsvm(x_train, y_train, params):
-    print("Training SVM with libsvm...")
-    svm_model = svm_train(y_train.tolist(), x_train.tolist(), params)
-    return svm_model
+def reduce_dataset(images, labels, max_samples):
+    indices = list(range(len(images)))
+    random.shuffle(indices)
+    selected_indices = indices[:max_samples]
+    reduced_images = [images[i] for i in selected_indices]
+    reduced_labels = [labels[i] for i in selected_indices]
+    return reduced_images, reduced_labels
 
-# Evaluate SVM using libsvm
-def evaluate_svm_with_libsvm(svm_model, x_test, y_test):
-    print("Evaluating SVM...")
-    y_pred, _, _ = svm_predict(y_test.tolist(), x_test.tolist(), svm_model)
-    accuracy = accuracy_score(y_test, y_pred)
-    return accuracy, y_pred
+def apply_pca(train_features, test_features, n_components=100):
+    train_features = np.array(train_features)
+    test_features = np.array(test_features)
 
-# Perform grid search for RBF kernel
-def grid_search_rbf_kernel(X_train, y_train):
-    print("Performing grid search with cross-validation for RBF kernel...")
-    best_params = None
-    best_accuracy = 0
-    C_values = [0.1, 1, 10, 100]
-    gamma_values = [0.0001, 0.001, 0.01, 0.1]
+    print(f"\nApplying PCA to reduce dimensionality to {n_components} components...")
+    pca = PCA(n_components=n_components)
+    train_features_reduced = pca.fit_transform(train_features)
+    test_features_reduced = pca.transform(test_features)
+    print(f"Reduced dimensionality: {train_features.shape[1]} -> {n_components}")
+    return train_features_reduced.tolist(), test_features_reduced.tolist()
 
-    kf = KFold(n_splits=3, shuffle=True, random_state=42)
+def grid_search_rbf(alpha, beta, gamma_weight, train_labels, train_features, test_labels, test_features, C_values, gamma_values):
+    print("\nPerforming Grid Search for RBF Kernel...\n")
+    best_score = 0
+    best_params = {}
+    grid_results = {}
 
-    for C in C_values:
-        for gamma in gamma_values:
-            params = f"-t 2 -c {C} -g {gamma}"  # RBF kernel: -t 2
-            fold_accuracies = []
+    for C, gamma in product(C_values, gamma_values):
+        param_str = f"-s 0 -t 2 -c {C} -g {gamma} -q"
+        print(f"Testing parameters: C={C}, gamma={gamma}, kernel=rbf")
 
-            for train_idx, val_idx in kf.split(X_train):
-                x_fold_train, x_fold_val = X_train[train_idx], X_train[val_idx]
-                y_fold_train, y_fold_val = y_train[train_idx], y_train[val_idx]
+        start_time = time.time()
+        temp_model = svm_train(train_labels, train_features, param_str)
+        elapsed_time = time.time() - start_time
+        print(f"Elapsed Time: {elapsed_time:.2f} seconds")
 
-                svm_model = train_svm_with_libsvm(x_fold_train, y_fold_train, params)
-                accuracy, _ = evaluate_svm_with_libsvm(svm_model, x_fold_val, y_fold_val)
-                fold_accuracies.append(accuracy)
+        accuracy_train = svm_predict(train_labels, train_features, temp_model)
+        num_support_vectors, accuracy, predicted_labels, _ = evaluate(temp_model, test_labels, test_features)
+        grid_results[(C, gamma)] = accuracy[0]
 
-            mean_accuracy = np.mean(fold_accuracies)
-            print(f"Params: C={C}, gamma={gamma}, CV Accuracy={mean_accuracy:.4f}")
+        f1 = f1_score(test_labels, predicted_labels, average='weighted')
+        print(f"F1 Score: {f1:.4f}")
 
-            if mean_accuracy > best_accuracy:
-                best_accuracy = mean_accuracy
-                best_params = params
+        support_vector_penalty = gamma_weight * (num_support_vectors / len(train_labels))
 
-    print(f"Best Params for RBF kernel: {best_params}, Best CV Accuracy: {best_accuracy:.4f}")
-    return best_params
+        combined_score = alpha * accuracy_train[1][0] + beta * f1 - support_vector_penalty
 
-# Plot results
-def plot_results(y_test, y_pred, accuracy, model_name):
-    cm = confusion_matrix(y_test, y_pred)
-    plt.figure(figsize=(10, 7))
-    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
-    plt.title(f"Confusion Matrix ({model_name}, Accuracy: {accuracy:.4f})")
-    plt.colorbar()
-    tick_marks = np.arange(len(np.unique(y_test)))
-    plt.xticks(tick_marks, tick_marks)
-    plt.yticks(tick_marks, tick_marks)
-    plt.xlabel('Predicted Labels')
-    plt.ylabel('True Labels')
-    plot_file = f"FINAL_confusion_matrix_{model_name}.png"
-    plt.savefig(plot_file)
-    plt.close()
-    print(f"Confusion matrix saved as {plot_file}")
+        print(f"Number of Support Vectors: {num_support_vectors}")
+        print(f"Training Set Size: {len(train_labels)}")
+        print(f"Percentage of Support Vectors: {100 * num_support_vectors / len(train_labels):.2f}%")
+        print("\n")
 
-# Load CIFAR-10 dataset
-data_dir = 'cifar-10-batches-py'
-(x_train, y_train), (x_test, y_test) = load_cifar10_data(data_dir)
+        if combined_score > best_score:
+            best_score = combined_score
+            best_params = {'C': C, 'gamma': gamma}
 
-# Preprocess the dataset
-x_train = x_train / 255.0  # Normalize pixel values to [0, 1]
-x_test = x_test / 255.0
+    print("\nGrid Search Complete")
+    print(f"Best Parameters: {best_params}")
+    return best_params, grid_results
 
-num_classes = 10
-y_train = np.array(y_train)
-y_test = np.array(y_test)
 
-# Flatten the data
-X = np.vstack((x_train.reshape(x_train.shape[0], -1), x_test.reshape(x_test.shape[0], -1)))
-y = np.hstack((y_train, y_test))
+def evaluate(model, test_labels, test_features):
+    print("\nEvaluating model on the test set...")
+    predicted_labels, accuracy, pred_values = svm_predict(test_labels, test_features, model)
+    num_support_vectors = model.get_nr_sv()
+    return num_support_vectors, accuracy, predicted_labels, pred_values
 
-# Perform PCA for dimensionality reduction
-pca_variance = 0.85  # Adjusted to retain 85% variance
-X_pca = perform_pca_specific_variance(X, pca_variance)
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.4, random_state=42)
-print(f"Training samples: {X_train.shape[0]}, Testing samples: {X_test.shape[0]}")
+def plot_results_rbf(C_values, gamma_values, grid_results, name_prefix="grid_search_rbf"):
+    plt.figure(figsize=(8, 6))
+    plt.title("Grid Search Accuracy for RBF Kernel", fontsize=16)
+    plt.xlabel("Gamma", fontsize=14)
+    plt.ylabel("C", fontsize=14)
 
-# Grid search for RBF kernel
-start_time = time.time()
-best_rbf_params = grid_search_rbf_kernel(X_train, y_train)
-grid_search_time = time.time() - start_time
-print(f"Grid search completed in {grid_search_time:.2f} seconds.")
+    accuracy_matrix = [[grid_results[(C, gamma)] for gamma in gamma_values] for C in C_values]
+    plt.imshow(accuracy_matrix, interpolation='nearest', cmap='viridis', origin='lower', aspect='auto',
+               extent=[min(gamma_values), max(gamma_values), min(C_values), max(C_values)])
+    plt.colorbar(label="Accuracy (%)")
+    plt.xticks(gamma_values, [f"{g:.2e}" for g in gamma_values], fontsize=12)
+    plt.yticks(C_values, [f"{c}" for c in C_values], fontsize=12)
+    plt.savefig(f"{name_prefix}.png")
+    print(f"Plot saved as '{name_prefix}.png'")
 
-# Train final RBF model
-start_time = time.time()
-final_rbf_model = train_svm_with_libsvm(X_train, y_train, best_rbf_params)
-training_time = time.time() - start_time
-print(f"Final RBF model trained in {training_time:.2f} seconds.")
 
-# Evaluate the final model
-start_time = time.time()
-final_accuracy, y_pred = evaluate_svm_with_libsvm(final_rbf_model, X_test, y_test)
-evaluation_time = time.time() - start_time
-print(f"Evaluation completed in {evaluation_time:.2f} seconds.")
-print(f"Final RBF Kernel Accuracy: {final_accuracy:.4f}")
+def retrain_with_best_params(best_params, train_labels, train_features):
+    C = best_params['C']
+    gamma = best_params['gamma']
+    param_str = f"-s 0 -t 2 -c {C} -g {gamma} -q"
+    print(f"\nRetraining SVM with best parameters: C={C}, gamma={gamma} (RBF Kernel)...")
+    final_model = svm_train(train_labels, train_features, param_str)
+    return final_model
 
-# Save results and plot confusion matrix
-results_file = "svm_rbf_results.txt"
-with open(results_file, "w") as f:
-    f.write(f"Final RBF Kernel SVM Accuracy: {final_accuracy:.4f}\n")
-    f.write(f"Training Time: {training_time:.2f} seconds\n")
-    f.write(f"Evaluation Time: {evaluation_time:.2f} seconds\n")
-    f.write(f"Classification Report:\n{classification_report(y_test, y_pred)}\n")
-plot_results(y_test, y_pred, final_accuracy, "RBF")
 
-print(f"Results saved to {results_file}")
+def write_results_to_file(best_params, grid_results, final_accuracy, num_support_vectors, filename="rbf.txt"):
+    with open(filename, "w") as f:
+        f.write("Grid Search Results for RBF Kernel\n")
+        f.write("=" * 50 + "\n")
+        f.write(f"Best Parameters: {best_params}\n")
+        f.write("\nGrid Search Results:\n")
+        for (C, gamma), accuracy in grid_results.items():
+            f.write(f"C={C}, gamma={gamma}, accuracy={accuracy:.2f}%\n")
+        f.write("\nFinal Model Evaluation:\n")
+        f.write(f"Accuracy: {final_accuracy[0]:.2f}%\n")
+        f.write(f"Number of Support Vectors: {num_support_vectors}\n")
+    print(f"Results written to {filename}")
+
+
+def main():
+    data_directory = 'cifar-10-batches-py'
+    (x_train_data, y_train_data), (x_test_data, y_test_data) = load_cifar10_data(data_directory)
+
+    class_filter = [0, 1]
+    train_indices = [i for i, label in enumerate(y_train_data) if label in class_filter]
+    test_indices = [i for i, label in enumerate(y_test_data) if label in class_filter]
+
+    img_train = [x_train_data[i].flatten() for i in train_indices]
+    label_train = [y_train_data[i] for i in train_indices]
+    img_test = [x_test_data[i].flatten() for i in test_indices]
+    label_test = [y_test_data[i] for i in test_indices]
+
+    max_samples = 60000
+    img_train, label_train = reduce_dataset(img_train, label_train, max_samples)
+
+    n_components = 100
+    img_train_reduced, img_test_reduced = apply_pca(img_train, img_test, n_components)
+
+    alpha = 0.40
+    beta = 0.60
+    gamma_weight = 10
+    C_values = [0.001, 0.01, 0.1, 1, 10, 100]
+    gamma_values = [0.001, 0.01, 0.1, 1, 10, 100]
+
+    best_params, grid_results = grid_search_rbf(
+        alpha, beta, gamma_weight,
+        label_train, img_train_reduced,
+        label_test, img_test_reduced,
+        C_values, gamma_values
+    )
+
+    final_model = retrain_with_best_params(best_params, label_train, img_train_reduced)
+
+    num_support_vectors, final_accuracy, predicted_labels, _ = evaluate(final_model, label_test, img_test_reduced)
+    print(f"\nFinal Model Evaluation:")
+    print(f"Accuracy: {final_accuracy[0]:.2f}%")
+    print(f"Number of Support Vectors: {num_support_vectors}")
+
+    write_results_to_file(best_params, grid_results, final_accuracy, num_support_vectors, filename="rbf.txt")
+
+    name = "grid_search_rbf_2_classes_with_pca_60000"
+    plot_results_rbf(C_values, gamma_values, grid_results, name)
+
+
+if __name__ == "__main__":
+    main()
