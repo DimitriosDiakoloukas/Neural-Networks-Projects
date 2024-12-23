@@ -127,7 +127,7 @@ def main():
     img_test = [x_test_data[i].flatten() for i in test_indices]
     label_test = [y_test_data[i] for i in test_indices]
 
-    max_samples = 60000
+    max_samples = 12000
     img_train, label_train = reduce_dataset(img_train, label_train, max_samples)
 
     n_components = 100
