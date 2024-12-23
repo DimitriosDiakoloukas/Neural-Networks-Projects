@@ -43,4 +43,4 @@ C=100, gamma=100, accuracy=50.30%
 Final Model Evaluation:
 Accuracy: 91.60%
 Number of Support Vectors: 3062
-Total Time: 362 sec
+Total Time: 362 seconds
