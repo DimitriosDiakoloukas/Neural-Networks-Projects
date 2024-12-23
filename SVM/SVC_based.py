@@ -7,12 +7,13 @@ from sklearn.svm import SVC
 import time
 from load_data_cifer import load_cifar10_data
 
-def perform_pca(data, variance_ratio):
-    print("Performing PCA...")
+
+def perform_pca(train_data, test_data, variance_ratio):
     pca = PCA(variance_ratio)
-    reduced_data = pca.fit_transform(data)
-    print(f"Number of components selected: {pca.n_components_}")
-    return reduced_data, pca.n_components_
+    train_reduced = pca.fit_transform(train_data)
+    test_reduced = pca.transform(test_data)
+    return train_reduced, test_reduced, pca.n_components_
+
 
 def train_svm(features, labels, hyperparams=None):
     if hyperparams is None:
@@ -21,14 +22,16 @@ def train_svm(features, labels, hyperparams=None):
     svm_model.fit(features, labels)
     return svm_model
 
+
 def evaluate_svm(model, features, labels):
     predictions = model.predict(features)
     accuracy = accuracy_score(labels, predictions)
     return accuracy, predictions
 
+
 if __name__ == "__main__":
     results_file = "svc_results_with_pca.txt"
-    
+
     data_dir = 'cifar-10-batches-py'
     (x_train, y_train), (x_test, y_test) = load_cifar10_data(data_dir)
 
@@ -40,31 +43,29 @@ if __name__ == "__main__":
         x_test_flat = x_test.reshape(x_test.shape[0], -1)
 
         variance_to_retain = 0.90
-        x_train_pca, num_components_train = perform_pca(x_train_flat, variance_to_retain)
-        x_test_pca, num_components_test = perform_pca(x_test_flat, variance_to_retain)
+        x_train_pca, x_test_pca, num_components = perform_pca(x_train_flat, x_test_flat, variance_to_retain)
 
-        f.write(f"Number of PCA components retained: {num_components_train}\n")
+        f.write(f"Number of PCA components retained: {num_components}\n")
 
         x_train_split, x_val_split, y_train_split, y_val_split = train_test_split(
             x_train_pca, y_train, test_size=0.2, random_state=42
         )
 
         reduced_param_dist = {
-            'C': [0.1, 1],  
-            'gamma': ['scale', 'auto'],  
-            'kernel': ['linear', 'rbf']  
+            'C': [0.1, 1],
+            'gamma': ['scale', 'auto'],
+            'kernel': ['linear', 'rbf']
         }
 
         svm_search = RandomizedSearchCV(
             SVC(),
             param_distributions=reduced_param_dist,
-            cv=2,  
-            n_iter=5,  
+            cv=2,
+            n_iter=5,
             random_state=42,
             n_jobs=-1
         )
 
-        f.write("Starting hyperparameter search...\n")
         start_search_time = time.time()
         svm_search.fit(x_train_split, y_train_split)
         search_time = time.time() - start_search_time
@@ -81,7 +82,6 @@ if __name__ == "__main__":
 
         f.write(f"Test Accuracy: {test_accuracy:.4f}\n")
         f.write(f"Evaluation time: {evaluation_time:.2f} seconds\n")
-
         f.write(f"Predictions: {predictions[:10]}... (first 10 predictions)\n")
 
     print(f"Results saved to {results_file}")
