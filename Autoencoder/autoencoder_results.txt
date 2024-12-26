@@ -1,0 +1,3 @@
+Reconstruction Accuracy (1 - MSE): 0.9925
+Training Loss and Validation Loss Plots saved as 'training_loss.png'.
+Reconstructed and Original Images comparison saved as 'autoencoder_results.png'.
