@@ -1,0 +1,4 @@
+Training Time: 95.14 seconds
+Final Training Loss: 0.0013
+Reconstruction Accuracy (1 - MSE): 0.9988
+Comparison Image Saved as: 'comparison_tf_fit.png'
