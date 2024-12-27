@@ -4,6 +4,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import seaborn as sns
 from load_data_cifer import load_cifar10_data  
 
 class RBFNetwork:
@@ -15,6 +17,7 @@ class RBFNetwork:
         self.weights = None
         self.encoder = OneHotEncoder()
         self.regularization = regularization
+        self.losses = [] 
 
     def _rbf_kernel(self, X, centers, sigmas):
         n_samples, n_features = X.shape
@@ -28,7 +31,6 @@ class RBFNetwork:
             kernel_matrix[i:i+batch_size, :] = np.exp(-distances**2 / (2 * sigmas**2))
 
         return kernel_matrix
-
 
     def _compute_sigmas(self, centers):
         distances = euclidean_distances(centers)
@@ -57,6 +59,14 @@ class RBFNetwork:
         regularization_matrix = self.regularization * np.eye(G.shape[1])
         self.weights = np.linalg.solve(G.T @ G + regularization_matrix, G.T @ y_one_hot)
         print("Weights computed.")
+
+        print("Tracking training loss...")
+        for i in range(X.shape[0]):
+            batch = X[i:i + 1]  
+            G_batch = self._rbf_kernel(batch, self.centers, self.sigmas)
+            y_pred = G_batch @ self.weights
+            loss = np.mean((y_one_hot[i:i + 1] - y_pred) ** 2)
+            self.losses.append(loss)
 
     def predict(self, X):
         G = self._rbf_kernel(X, self.centers, self.sigmas)
@@ -99,8 +109,32 @@ if __name__ == "__main__":
     print("Evaluating RBF Neural Network...")
     accuracy, cm, report = rbf_net.evaluate(X_test_pca, y_test)
 
-    print(f"\nAccuracy: {accuracy * 100:.2f}%")
-    print("Confusion Matrix:")
-    print(cm)
-    print("Classification Report:")
-    print(report)
+    results_text = (
+        f"\nAccuracy: {accuracy * 100:.2f}%\n"
+        f"Confusion Matrix:\n{cm}\n"
+        f"Classification Report:\n{report}\n"
+    )
+
+    with open('improved_rbf_results.txt', 'w') as f:
+        f.write(results_text)
+
+    print("Results saved to 'rbf_results.txt'.")
+
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=range(10), yticklabels=range(10))
+    plt.title('Confusion Matrix')
+    plt.xlabel('Predicted Labels')
+    plt.ylabel('True Labels')
+    plt.savefig('improved_confusion_matrix.png')
+
+    print("Confusion matrix saved as 'improved_confusion_matrix.png'.")
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(rbf_net.losses, label='Training Loss')
+    plt.title('Training Loss over Time')
+    plt.xlabel('Samples')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.savefig('improved_training_loss.png')
+
+    print("Training loss plot saved as 'improved_training_loss.png'.")
