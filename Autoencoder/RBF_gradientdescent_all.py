@@ -96,7 +96,7 @@ num_centers_list = [100, 300, 500]
 gamma = 1.0
 num_classes = 10
 input_dim = 300
-epochs = 20
+epochs = 50
 is_trainable = True
 
 os.makedirs('results', exist_ok=True)
