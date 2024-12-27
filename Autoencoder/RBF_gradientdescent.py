@@ -3,8 +3,10 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.decomposition import PCA
+import seaborn as sns
+import matplotlib.pyplot as plt
 from load_data_cifer import load_cifar10_data
 
 
@@ -68,7 +70,6 @@ def train_rbfnn_model(X_train, Y_train, X_test, Y_test, is_trainable, gamma, num
     return model, history
 
 
-# Load and preprocess CIFAR-10 dataset
 data_dir = 'cifar-10-batches-py'
 (X_train, y_train), (X_test, y_test) = load_cifar10_data(data_dir)
 
@@ -86,12 +87,11 @@ encoder = OneHotEncoder(sparse_output=False)
 y_train_oh = encoder.fit_transform(y_train.reshape(-1, 1))
 y_test_oh = encoder.transform(y_test.reshape(-1, 1))
 
-# Train RBFNN
 num_centers = 500
 gamma = 1.0
 num_classes = 10
 input_dim = 300
-epochs = 20
+epochs = 50
 is_trainable = True
 random_centers = False
 
@@ -102,16 +102,16 @@ model, history = train_rbfnn_model(
     input_shape_=input_dim, epochs=epochs, random_centers=random_centers
 )
 
-# Evaluate RBFNN
 y_pred = np.argmax(model.predict(X_test_pca), axis=1)
 accuracy = accuracy_score(y_test, y_pred)
 report = classification_report(y_test, y_pred)
-print(f"\nAccuracy: {accuracy * 100:.2f}%")
-print("Classification Report:")
-print(report)
 
-# Plot Training and Validation Curves
-import matplotlib.pyplot as plt
+results_text = f"\nAccuracy: {accuracy * 100:.2f}%\nClassification Report:\n{report}\n"
+
+print(results_text)
+
+with open('rbfnn_results.txt', 'w') as file:
+    file.write(results_text)
 
 plt.figure()
 plt.plot(history.history['loss'], label='Training Loss')
@@ -130,3 +130,11 @@ plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.legend()
 plt.savefig('training_validation_accuracy_rbfnn.png')
+
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(10, 8))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=encoder.categories_[0], yticklabels=encoder.categories_[0])
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted Labels')
+plt.ylabel('True Labels')
+plt.savefig('confusion_matrix_rbfnn.png')
