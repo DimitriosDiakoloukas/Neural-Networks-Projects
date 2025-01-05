@@ -1,4 +1,4 @@
-RBF Neural Network Results
+RBF Network Results
 Training time: 18.05 seconds
 Testing time: 3.24 seconds
 Accuracy: 41.45%

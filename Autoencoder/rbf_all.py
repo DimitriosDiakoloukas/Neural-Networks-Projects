@@ -79,7 +79,7 @@ accuracy_rbf = accuracy_score(y_test, y_pred_rbf)
 conf_matrix_rbf = confusion_matrix(y_test, y_pred_rbf)
 classification_report_rbf = classification_report(y_test, y_pred_rbf)
 
-print("RBF Neural Network Results")
+print("RBF Network Results")
 print(f"Training time: {training_time:.2f} seconds")
 print(f"Testing time: {testing_time:.2f} seconds")
 print(f"Accuracy: {accuracy_rbf * 100:.2f}%")
@@ -89,7 +89,7 @@ print("Classification Report:")
 print(classification_report_rbf)
 
 with open("results_report_all.txt", "w") as f:
-    f.write("RBF Neural Network Results\n")
+    f.write("RBF Network Results\n")
     f.write(f"Training time: {training_time:.2f} seconds\n")
     f.write(f"Testing time: {testing_time:.2f} seconds\n")
     f.write(f"Accuracy: {accuracy_rbf * 100:.2f}%\n")
@@ -154,7 +154,7 @@ def plot_confusion_matrix(cm, title, labels, filename):
     plt.close()
 
 labels = [str(i) for i in range(10)]  
-plot_confusion_matrix(conf_matrix_rbf, "RBF Neural Network Confusion Matrix", labels, "conf_matrix_rbf.png")
+plot_confusion_matrix(conf_matrix_rbf, "RBF Network Confusion Matrix", labels, "conf_matrix_rbf.png")
 
 for k in k_values:
     knn = KNeighborsClassifier(n_neighbors=k)

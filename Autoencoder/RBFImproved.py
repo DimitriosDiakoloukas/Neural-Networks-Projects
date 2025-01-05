@@ -98,15 +98,15 @@ if __name__ == "__main__":
     X_train_pca = pca.fit_transform(X_train_flat)
     X_test_pca = pca.transform(X_test_flat)
 
-    print("Initializing RBF Neural Network...")
+    print("Initializing RBF Network...")
     num_centers = 500  
     output_dim = 10   
     rbf_net = RBFNetwork(num_centers=num_centers, output_dim=output_dim, regularization=1e-5)
 
-    print("Training RBF Neural Network...")
+    print("Training RBF Network...")
     rbf_net.fit(X_train_pca, y_train)
 
-    print("Evaluating RBF Neural Network...")
+    print("Evaluating RBF Network...")
     accuracy, cm, report = rbf_net.evaluate(X_test_pca, y_test)
 
     results_text = (
