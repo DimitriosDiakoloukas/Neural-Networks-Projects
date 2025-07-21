@@ -8,4 +8,5 @@
 *.fdb_latexmk
 *.fls
 _minted-*
+*.tex
 
